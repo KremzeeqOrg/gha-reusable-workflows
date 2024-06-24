@@ -9,11 +9,12 @@ on:
         required: true
       aws-iam-role:
         required: true
-        
+
 jobs:
   terraform:
     name: "Terraform Plan for PR"
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
       # Use sparse checkout to only select files in a defined workspace
       # Turning off cone mode ensures that files in the project root are not included during checkout
@@ -28,6 +29,8 @@ jobs:
       - name: Move files to root
         id: plan
         run: |
+            echo TF_WORKING_DIR
+            echo ${{ vars.TF_WORKING_DIR }}
             mv ${{ vars.TF_WORKING_DIR }}/* .
             rm -rf ${{ vars.TF_WORKING_DIR }}
             ls -lah
