@@ -4,7 +4,6 @@ on:
       environment:
         type: string
         required: true
-
     secrets:
       aws-region:
         required: true
@@ -12,20 +11,6 @@ on:
         required: true
 
 jobs:
-  # set-env-vars:
-  #   name: "Set Env vars"
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     approvers: ${{ steps.set-env-vars.outputs.terraform-plan-approvers }}
-  #     minimum-approvals: ${{ steps.set-env-vars.outputs.minimum-approvals }}
-  #   steps:
-  #   - name: "Set inputs to GITHUB_OUTPUT"
-  #     id: set-env-vars
-  #     run: |
-  #       a=${{ inputs.terraform-plan-approvers }}
-  #       b=${{ inputs.minimum-approvals }}
-  #       echo "approvers=${{ a }} >> $GITHUB_OUTPUT
-  #       echo "minimum-approvals=${{ b }} >> $GITHUB_OUTPUT
   terraform:
     name: "Terraform Plan and Apply"
     runs-on: ubuntu-latest
@@ -53,10 +38,10 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ secrets.aws-region }}
           mask-aws-account-id: true
-      - name: Setup Terraform ${{ vars.TF_VERSION }} for ${{ vars.ENV }}
+      - name: Setup Terraform ${{ secrets.TF_VERSION }} for ${{ vars.ENV }}
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ vars.TF_VERSION }}
+          terraform_version: ${{ secrets.TF_VERSION }}
       - name: Terraform Plan for ${{ vars.ENV }}
         run: |
           terraform init -backend-config=${{ vars.TF_BACKEND_CONFIG_FILE }}
