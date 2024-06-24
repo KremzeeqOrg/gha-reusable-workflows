@@ -4,6 +4,12 @@ on:
       env:
         required: true
         type: string
+      terraform-plan-approvers:
+        required: true
+        type: string
+      minimum-approvals:
+        required: true
+        type: number
       terraform-version:
         required: true
         type: string
@@ -16,12 +22,7 @@ on:
       terraform-vars-file:
         required: true
         type: string
-      terraform-plan-approvers:
-        required: true
-        type: string
-      minimum-approvals:
-        required: true
-        type: number
+
     secrets:
       aws-region:
         required: true
@@ -32,6 +33,10 @@ jobs:
   terraform:
     name: "Terraform Plan and Apply"
     runs-on: ubuntu-latest
+    env:
+      approvers: ${{ inputs.terraform-plan-approvers }}
+      minimum-approvals: ${{ inputs.minimum-approvals }}
+
     steps:
       # Use sparse checkout to only select files in a in a defined workspace
       # Turning off cone mode ensures that files in the project root are not included during checkout
@@ -68,8 +73,8 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.token }}
-          approvers: ${{ inputs.terraform-plan-approvers }}
-          minimum-approvals: ${{ inputs.minimum-approvals }}
+          approvers: ${{ env.approvers }}
+          minimum-approvals: ${{ env.minimum-approvals }}
           issue-title: "Deploy Terraform Plan to ${{ inputs.env }}"
           issue-body: "Please review the Terraform Plan"
           exclude-workflow-initiator-as-approver: false
