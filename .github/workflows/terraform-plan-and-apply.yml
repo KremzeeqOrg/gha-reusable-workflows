@@ -30,13 +30,21 @@ on:
         required: true
 
 jobs:
+  set-env-vars:
+    name: "Set Env vars"
+    runs-on: ubuntu-latest
+    outputs:
+      approvers: ${{ inputs.terraform-plan-approvers }}
+      minimum-approvals: ${{ inputs.minimum-approvals }}
+    steps:
+    - name: "Set inputs to GITHUB_OUTPUT"
+      run: |
+        echo "approvers=${{ inputs.terraform-plan-approvers }} >> $GITHUB_OUTPUT
+        echo "minimum-approvals=${{ inputs.minimum-approvals }} >> $GITHUB_OUTPUT
   terraform:
     name: "Terraform Plan and Apply"
     runs-on: ubuntu-latest
-    env:
-      approvers: ${{ inputs.terraform-plan-approvers }}
-      minimum-approvals: ${{ inputs.minimum-approvals }}
-
+    needs: set-env-vars
     steps:
       # Use sparse checkout to only select files in a in a defined workspace
       # Turning off cone mode ensures that files in the project root are not included during checkout
@@ -73,8 +81,8 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.token }}
-          approvers: ${{ env.approvers }}
-          minimum-approvals: ${{ env.minimum-approvals }}
+          approvers: ${{ needs.set-env-vars.outputs.approvers }}
+          minimum-approvals: ${{ needs.set-env-vars.outputs.minimum-approvals }}
           issue-title: "Deploy Terraform Plan to ${{ inputs.env }}"
           issue-body: "Please review the Terraform Plan"
           exclude-workflow-initiator-as-approver: false
