@@ -34,10 +34,11 @@ jobs:
     name: "Set Env vars"
     runs-on: ubuntu-latest
     outputs:
-      approvers: ${{ inputs.terraform-plan-approvers }}
-      minimum-approvals: ${{ inputs.minimum-approvals }}
+      approvers: ${{ steps.set-env-vars.outputs.terraform-plan-approvers }}
+      minimum-approvals: ${{ steps.set-env-vars.outputs.minimum-approvals }}
     steps:
     - name: "Set inputs to GITHUB_OUTPUT"
+      id: set-env-vars
       run: |
         echo "approvers=${{ inputs.terraform-plan-approvers }} >> $GITHUB_OUTPUT
         echo "minimum-approvals=${{ inputs.minimum-approvals }} >> $GITHUB_OUTPUT
