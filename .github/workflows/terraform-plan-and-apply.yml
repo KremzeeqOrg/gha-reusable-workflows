@@ -40,8 +40,10 @@ jobs:
     - name: "Set inputs to GITHUB_OUTPUT"
       id: set-env-vars
       run: |
-        echo "approvers=${{ inputs.terraform-plan-approvers }} >> $GITHUB_OUTPUT
-        echo "minimum-approvals=${{ inputs.minimum-approvals }} >> $GITHUB_OUTPUT
+        a=${{ inputs.terraform-plan-approvers }}
+        b=${{ inputs.minimum-approvals }}
+        echo "approvers=${{ a }} >> $GITHUB_OUTPUT
+        echo "minimum-approvals=${{ b }} >> $GITHUB_OUTPUT
   terraform:
     name: "Terraform Plan and Apply"
     runs-on: ubuntu-latest
