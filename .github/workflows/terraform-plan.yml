@@ -4,6 +4,12 @@ on:
       environment:
         type: string
         required: true
+    secrets:
+      aws-region:
+        required: true
+      aws-iam-role:
+        required: true
+        
 jobs:
   terraform:
     name: "Terraform Plan for PR"
