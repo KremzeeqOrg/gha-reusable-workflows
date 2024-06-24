@@ -38,27 +38,27 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ secrets.aws-region }}
           mask-aws-account-id: true
-      - name: Setup Terraform ${{ secrets.TF_VERSION }} for ${{ vars.ENV }}
+      - name: Setup Terraform ${{ vars.TF_VERSION }} for ${{ vars.ENV }}
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ secrets.TF_VERSION }}
+          terraform_version: ${{ vars.TF_VERSION }}
       - name: Terraform Plan for ${{ vars.ENV }}
         run: |
           terraform init -backend-config=${{ vars.TF_BACKEND_CONFIG_FILE }}
           terraform plan -no-color -var-file=${{ vars.TF_VARS_FILE }} -out=.tfplanfile
-      - name: Approval Step
-        # This action polls GitHub API until issue raised is approved in relation to the Terraform Plan
-        # Timeout for approval is 72 hours. 
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.token }}
-          approvers: ${{ vars.TF_PLAN_APPROVERS }}
-          minimum-approvals: ${{ vars.MINIMUM_APPROVALS }}
-          issue-title: "Deploy Terraform Plan to ${{ vars.env }}"
-          issue-body: "Please review the Terraform Plan"
-          exclude-workflow-initiator-as-approver: false
-          additional-approved-words: ''
-          additional-denied-words: ''
-      - name: Terraform Apply for ${{ vars.env }}
-        run: |
-          terraform apply -json .tfplanfile
+      # - name: Approval Step
+      #   # This action polls GitHub API until issue raised is approved in relation to the Terraform Plan
+      #   # Timeout for approval is 72 hours. 
+      #   uses: trstringer/manual-approval@v1
+      #   with:
+      #     secret: ${{ github.token }}
+      #     approvers: ${{ vars.TF_PLAN_APPROVERS }}
+      #     minimum-approvals: ${{ vars.MINIMUM_APPROVALS }}
+      #     issue-title: "Deploy Terraform Plan to ${{ vars.env }}"
+      #     issue-body: "Please review the Terraform Plan"
+      #     exclude-workflow-initiator-as-approver: false
+      #     additional-approved-words: ''
+      #     additional-denied-words: ''
+      # - name: Terraform Apply for ${{ vars.env }}
+      #   run: |
+      #     terraform apply -json .tfplanfile
