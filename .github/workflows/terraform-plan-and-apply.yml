@@ -23,6 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_call.head_sha }}
           repository: ${{ github.repository }}
           sparse-checkout: ${{ vars.TF_WORKING_DIR }}
           sparse-checkout-cone-mode: false
