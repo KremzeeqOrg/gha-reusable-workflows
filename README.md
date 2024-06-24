@@ -80,7 +80,8 @@ on:
       terraform-working-dir: "terraform"
       terraform-backend-config-file: "backend-dev.tfvars"
       terraform-vars-file: "tf-vars-dev.tfvars"
-      terraform-plan-approvers: User
+      terraform-plan-approvers: User1
+      minimum-approvals: 1
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.DEV_AWS_ACCOUNT_ACCESS_ROLE }}
@@ -99,22 +100,21 @@ on:
       terraform-working-dir: "terraform"
       terraform-backend-config-file: "backend-dev.tfvars"
       terraform-vars-file: "tf-vars-dev.tfvars"
-      terraform-plan-approvers: User
+      terraform-plan-approvers: User1,User2
+      minimum-approvals: 2
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.PROD_AWS_ACCOUNT_ACCESS_ROLE }}
-
-</details>
 ```
 
 </details>
 
-## Acknowledgments
+## Acknowledegments
 
-Please see these GitHub Action projects for further information:
+The workflows comprise of different GitHub Actions below. Please see these GitHub Action projects for further information:
 
 - [actions/checkout](https://github.com/actions/checkout)
-- [aws-actions/configure-aws-credentials][https://github.com/aws-actions/configure-aws-credentials]
+- [aws-actions/configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials)
 - [hashicorp/setup-terraform@v3](https://github.com/hashicorp/setup-terraform)
 - [borchero/terraform-plan-comment@v1](https://github.com/borchero/terraform-plan-comment)
 - [trstringer/manual-approval@v1](https://github.com/trstringer/manual-approval)

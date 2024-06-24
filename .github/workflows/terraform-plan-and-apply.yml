@@ -19,6 +19,9 @@ on:
       terraform-plan-approvers:
         required: true
         type: string
+      minimum-approvals:
+        required: true
+        type: number
     secrets:
       aws-region:
         required: true
@@ -66,7 +69,7 @@ jobs:
         with:
           secret: ${{ github.token }}
           approvers: ${{ inputs.terraform-plan-approvers }}
-          minimum-approvals: 1
+          minimum-approvals: ${{ inputs.minimum-approvals }}
           issue-title: "Deploy Terraform Plan to ${{ inputs.env }}"
           issue-body: "Please review the Terraform Plan"
           exclude-workflow-initiator-as-approver: false
