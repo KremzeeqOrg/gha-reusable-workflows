@@ -74,6 +74,6 @@ jobs:
           exclude-workflow-initiator-as-approver: false
           additional-approved-words: ''
           additional-denied-words: ''
-      - name: Terraform Apply for ${{ inputs.env }}
+      - name: Terraform Apply for ${{ vars.env }}
         run: |
           terraform apply -json .tfplanfile
