@@ -29,13 +29,9 @@ on:
       id-token: write
       contents: read
       pull-requests: write
-    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan.yml
+    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan.yml@main
     with:
-      env: "dev"
-      terraform-version: "1.8.5"
-      terraform-working-dir: "terraform"
-      terraform-backend-config-file: "backend-dev.tfvars"
-      terraform-vars-file: "tf-vars-dev.tfvars"
+      environment: dev
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.DEV_AWS_ACCOUNT_ACCESS_ROLE }}
@@ -62,52 +58,55 @@ This workflow could be used following a merge of a PR to the main branch of your
 
 ```
 
-on:
-  push:
-    branches:
-      - main
-
-  deploy-to-dev:
-    name: Deploy to Dev in AWS
+jobs:
+  tf-plan-and-apply-in-dev:
+    name: Terraform Plan and Apply in Dev
     permissions:
       id-token: write
       issues: write
       contents: read
-    uses: ./.github/workflows/terraform-plan-and-apply.yml
+    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan-and-apply.yml@main
     with:
-      env: "dev"
-      terraform-version: "1.8.5"
-      terraform-working-dir: "terraform"
-      terraform-backend-config-file: "backend-dev.tfvars"
-      terraform-vars-file: "tf-vars-dev.tfvars"
-      terraform-plan-approvers: User1
-      minimum-approvals: 1
+      environment: dev
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.DEV_AWS_ACCOUNT_ACCESS_ROLE }}
 
-
-    deploy-to-prod:
-    name: Deploy to Dev in AWS
+  tf-plan-and-apply-in-prod:
+    name: Terraform Plan and Apply in Prod
+    needs: tf-plan-and-apply-in-dev
     permissions:
       id-token: write
       issues: write
       contents: read
-    uses: ./.github/workflows/terraform-plan-and-apply.yml
+    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan-and-apply.yml@main
     with:
-      env: "prod"
-      terraform-version: "1.8.5"
-      terraform-working-dir: "terraform"
-      terraform-backend-config-file: "backend-dev.tfvars"
-      terraform-vars-file: "tf-vars-dev.tfvars"
-      terraform-plan-approvers: User1,User2
-      minimum-approvals: 2
+      environment: prod
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.PROD_AWS_ACCOUNT_ACCESS_ROLE }}
+
 ```
 
 </details>
+
+## Environment Variables
+
+In relation to your GitHub environment e.g. for `dev`/ `prod`, set the following variables:
+
+| Variable               | Explanation                                                                                         |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| ENV                    | e.g. `dev` / `prod`                                                                                 |
+| MINIMUM_APPROVALS\*    | Number of GitHub approvals needed for `terraform plan`                                              |
+| TF_BACKEND_CONFIG_FILE | Backend configuration file for Terraform, required for `terraform init`, e.g. `backend-dev.tfvars`  |
+| TF_PLAN_APPROVERS\*    | Specify GitHub user e.g. `user` or users e.g. `user1,user2`, who can approve Terraform Plan         |
+| TF_VARS_FILE           | Configuration file for environment variables for Terraform. e.g. `tf-vars-dev.tfvars`               |
+| TF_VERSION             | Terraform version e.g. run `terraform --version` to check what you're using locally e.g. 1.8.5      |
+| TF_WORKING_DIR         | Directory where all terraform files are kept in relation to the root for your repo e.g. `terraform` |
+
+- only required for Terraform Plan and Approve workflow
+
+Remember, GitHub environments can be set at the repo or organization level. Please see [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment) for more info.
 
 ## Acknowledegments
 

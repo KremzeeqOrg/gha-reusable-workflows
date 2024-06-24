@@ -15,7 +15,6 @@ jobs:
     name: "Terraform Plan and Apply"
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    # needs: set-env-vars
     steps:
       # Use sparse checkout to only select files in a in a defined workspace
       # Turning off cone mode ensures that files in the project root are not included during checkout
@@ -48,7 +47,7 @@ jobs:
         run: |
           terraform init -backend-config=${{ vars.TF_BACKEND_CONFIG_FILE }}
           terraform plan -no-color -var-file=${{ vars.TF_VARS_FILE }} -out=.tfplanfile
-      - name: Approval Step
+      - name: Approval Gate
         # This action polls GitHub API until issue raised is approved in relation to the Terraform Plan
         # Timeout for approval is 72 hours. 
         uses: trstringer/manual-approval@v1
