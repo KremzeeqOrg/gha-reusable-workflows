@@ -1,24 +1,9 @@
 on:
   workflow_call:
     inputs:
-      env:
-        required: true
+      environment:
         type: string
-      terraform-version:
         required: true
-        type: string
-      terraform-working-dir:
-        required: true
-        type: string
-      terraform-backend-config-file:
-        required: true
-        type: string
-      terraform-vars-file:
-        required: true
-        type: string
-      terraform-plan-approvers:
-        required: true
-        type: string
     secrets:
       aws-region:
         required: true
@@ -29,6 +14,7 @@ jobs:
   terraform:
     name: "Terraform Plan and Apply"
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
       # Use sparse checkout to only select files in a in a defined workspace
       # Turning off cone mode ensures that files in the project root are not included during checkout
@@ -36,13 +22,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          sparse-checkout: ${{ inputs.terraform-working-dir }}
+          ref: ${{ github.event.workflow_call.head_sha }}
+          repository: ${{ github.repository }}
+          sparse-checkout: ${{ vars.TF_WORKING_DIR }}
           sparse-checkout-cone-mode: false
       - name: Move files to root
         id: plan
         run: |
-            mv ${{ inputs.terraform-working-dir }}/* .
-            rm -rf ${{ inputs.terraform-working-dir }}
+            mv ${{ vars.TF_WORKING_DIR }}/* .
+            rm -rf ${{ vars.TF_WORKING_DIR }}
             ls -lah
       - name: Set AWS context
         uses: aws-actions/configure-aws-credentials@v4
@@ -51,27 +39,27 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ secrets.aws-region }}
           mask-aws-account-id: true
-      - name: Setup Terraform ${{ inputs.terraform-version }} for ${{ inputs.env }}
+      - name: Setup Terraform ${{ vars.TF_VERSION }} for ${{ vars.ENV }}
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ inputs.terraform-version }}
-      - name: Terraform Plan for ${{ inputs.env }}
+          terraform_version: ${{ vars.TF_VERSION }}
+      - name: Terraform Plan for ${{ vars.ENV }}
         run: |
-          terraform init -backend-config=${{ inputs.terraform-backend-config-file }}
-          terraform plan -no-color -var-file=${{ inputs.terraform-vars-file }} -out=.tfplanfile
-      - name: Approval Step
+          terraform init -backend-config=${{ vars.TF_BACKEND_CONFIG_FILE }}
+          terraform plan -no-color -var-file=${{ vars.TF_VARS_FILE }} -out=.tfplanfile
+      - name: Approval Gate
         # This action polls GitHub API until issue raised is approved in relation to the Terraform Plan
         # Timeout for approval is 72 hours. 
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.token }}
-          approvers: ${{ inputs.terraform-plan-approvers }}
-          minimum-approvals: 1
-          issue-title: "Deploy Terraform Plan to ${{ inputs.env }}"
+          approvers: ${{ vars.TF_PLAN_APPROVERS }}
+          minimum-approvals: ${{ vars.MINIMUM_APPROVALS }}
+          issue-title: "Deploy Terraform Plan to ${{ vars.env }}"
           issue-body: "Please review the Terraform Plan"
           exclude-workflow-initiator-as-approver: false
           additional-approved-words: ''
           additional-denied-words: ''
-      - name: Terraform Apply for ${{ inputs.env }}
+      - name: Terraform Apply for ${{ vars.env }}
         run: |
           terraform apply -json .tfplanfile
