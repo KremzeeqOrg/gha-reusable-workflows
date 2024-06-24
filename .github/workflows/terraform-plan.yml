@@ -1,0 +1,63 @@
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      terraform-version:
+        required: true
+        type: string
+      terraform-working-dir:
+        required: true
+        type: string
+      terraform-backend-config-file:
+        required: true
+        type: string
+      terraform-vars-file:
+        required: true
+        type: string
+    secrets:
+      aws-region:
+        required: true
+      aws-iam-role:
+        required: true
+
+jobs:
+  terraform:
+    name: "Terraform Plan for PR"
+    runs-on: ubuntu-latest
+    steps:
+      # Use sparse checkout to only select files in a defined workspace
+      # Turning off cone mode ensures that files in the project root are not included during checkout
+      # checkout pattern - https://github.com/actions/checkout/issues/483#issuecomment-1756354321
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: ${{ inputs.terraform-working-dir }}
+          sparse-checkout-cone-mode: false
+      - name: Move files to root
+        id: plan
+        run: |
+            mv ${{ inputs.terraform-working-dir }}/* .
+            rm -rf ${{ inputs.terraform-working-dir }}
+      - name: Set AWS context
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.aws-iam-role }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ secrets.aws-region }}
+          mask-aws-account-id: true
+      - name: Setup Terraform ${{ inputs.terraform-version }} for ${{ inputs.env }}
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform-version }}
+      - name: Terraform Plan for ${{ inputs.env }}
+        run: |
+          terraform init -backend-config=${{ inputs.terraform-backend-config-file }}
+          terraform plan -no-color -var-file=${{ inputs.terraform-vars-file }} -out=.tfplanfile
+      - name: Post Terraform plan comment
+        if: github.ref != 'refs/heads/main'
+        uses: borchero/terraform-plan-comment@v1
+        with:
+          token: ${{ github.token }}
+          planfile: ".tfplanfile"
