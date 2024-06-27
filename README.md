@@ -90,9 +90,40 @@ jobs:
 
 </details>
 
+## Pytest Unit Test
+
+This workflow can be used to run Pytest unit tests in relation to Python code.
+
+<details>
+
+<summary>Example GitHub Action Workflow Input Details with use of matrix</summary>
+
+```
+jobs:
+  pytest:
+    name: Pytest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        test_file: ${{ fromJson('["api_mapping_manager", "record_manager", "scraper", "utils"]') }}
+    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/pytest-unit-test-workflow.yml@main
+    with:
+      environment: dev
+      test_file: ${{ matrix.test_file }}
+```
+
+</details>
+
 ## Environment Variables
 
-In relation to your GitHub environment e.g. for `dev`/ `prod`, set the following variables:
+GitHub environments can be set at the repo or organization level, where environment variables can be specified. Please see [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment) for more info.
+
+<details>
+
+<summary>Variables for Terraform workflows</summary>
+
+In relation to your GitHub environment e.g. for `dev`/ `prod`, manually set the following variables:
 
 | Variable               | Explanation                                                                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------- |
@@ -104,9 +135,17 @@ In relation to your GitHub environment e.g. for `dev`/ `prod`, set the following
 | TF_VERSION             | Terraform version e.g. run `terraform --version` to check what you're using locally e.g. 1.8.5      |
 | TF_WORKING_DIR         | Directory where all terraform files are kept in relation to the root for your repo e.g. `terraform` |
 
-- only required for Terraform Plan and Approve workflow
+- \* only required for Terraform Plan and Approve workflow
 
-Remember, GitHub environments can be set at the repo or organization level. Please see [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment) for more info.
+</details>
+
+### Variables for Pytest Workflow
+
+| Variable        | Explanation                                                                                                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PYTHON_VERSION  | e.g. 3.10                                                                                                                                                                          |
+| PYTEST_TEST_DIR | e.g. `src/tests`                                                                                                                                                                   |
+| test_file       | This variable has to be directly specified in the workflow which calls the reusable workflow e.g. ${{ fromJson('["api_mapping_manager", "record_manager", "scraper", "utils"]') }} |
 
 ## Acknowledegments
 
