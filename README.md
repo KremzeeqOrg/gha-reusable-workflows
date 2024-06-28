@@ -102,11 +102,11 @@ jobs:
 ## Serverless Deploy Workflow
 
 <details>
+
 - [workflow](.github/workflows/serverless-deploy-workflow.yml)
-
-Based on the environment (`feature`/`dev`/`prod`), the workflow implements a tagging strategy for Docker images, which are built and pushed to AWS ECR. If the environment is `dev`, the image is tagged with `latest` and is pushed to Docker Hub. If the environment is `prod`, this latest image is pulled from Docker Hub prior to deployment. All environments result in a serverless deploy to respective environments, specified as the `stage`. This results in a AWS Cloudformation stack being provisioned with resources as specified in the `serverless.yml` file, speciifed in the repo that calls the reusable workflow.
-
-If you use this workflow, you will need to provision AWS ECR and Docker Hub repos with the same name as the `APP` e.g. `fruit-project-api-scraper`.
+- Based on the environment (`feature`/`dev`/`prod`), the workflow implements a tagging strategy for Docker images, which are built and pushed to AWS ECR. - If the environment is `dev`, the image is tagged with `latest` and is pushed to Docker Hub.
+- If the environment is `prod`, this latest image is pulled from Docker Hub prior to deployment. All environments result in a serverless deploy to respective environments, specified as the `stage`. This results in a AWS Cloudformation stack being provisioned with resources as specified in the `serverless.yml` file, speciifed in the repo that calls the reusable workflow.
+- If you use this workflow, you will need to provision AWS ECR and Docker Hub repos with the same name as the `APP` e.g. `fruit-project-api-scraper`.
 
 ### Typical Workflow Use Cases
 
@@ -135,9 +135,10 @@ The resusable workflow can support a straightforward deployment to an environmen
 ```
 
 </details>
-</details>
 
 It's also possible to use this to provision to an ephemeral (short-lived) environment, based on whether your pr as a `deploy` label. A teardown workflow can support removing the related cloudformation stack, once you have merged your pr.
+
+</details>
 
 <details>
 
