@@ -1,8 +1,13 @@
 # GitHub Actions Reusuable Workflows
 
-This repo consolidates reusable workflows.
+This repo consolidates reusable workflows for GitHub Actions. Example uses are available in these projects:
+
+[fruit-project-infra](https://github.com/KremzeeqOrg/fruit-project-infra)
+[fruit-project-api-scraper](https://github.com/KremzeeqOrg/fruit-project-api-scraper)
 
 ## Terraform Plan
+
+<details>
 
 - [workflow](.github/workflows/terraform-plan.yml)
 - Produces a Terraform Plan in relation to a target AWS account.
@@ -38,8 +43,11 @@ on:
 ```
 
 </details>
+</details>
 
 ## Terraform Plan and Apply
+
+<details>
 
 - [workflow](.github/workflows/terraform-plan-and-apply.yml)
 - Produces a Terraform Plan in relation to a target AWS account and raises an Issue in your GitHub repo where you are using the workflow.
@@ -89,14 +97,71 @@ jobs:
 ```
 
 </details>
+</details>
 
-## Pytest Unit Test
+## Serverless Deploy Workflow
 
-This workflow can be used to run Pytest unit tests in relation to Python code.
+<details>
+- [workflow](.github/workflows/serverless-deploy-workflow.yml)
+
+Based on the environment (`feature`/`dev`/`prod`), the workflow implements a tagging strategy for Docker images, which are built pushed to AWS ECR. If the environment is `dev`, the image is tagged with `latest` and is pushed to Docker Hub. If the environment is `prod`, this latest image is pulled from Docker Hub prior to deployment. All environments result in a serverless deploy to respective environments, specified as the `stage`. This results in a AWS Cloudformation stack being provisioned with resources as specified in the `serverless.yml` file, speciifed in the repo that calls the reusable workflow.
+
+If you use this workflow, you will need to provision AWS ECR and Docker Hub repos with the same name as the `APP` e.g. `fruit-project-api-scraper`.
+
+### Typical Workflow Use Cases
+
+The resusable workflow can support a straightforward deployment to an environment.
 
 <details>
 
-<summary>Example GitHub Action Workflow Input Details with use of matrix</summary>
+<summary>Example GitHub Action Workflow Input Details</summary>
+
+```
+  serverless-deploy:
+    name: Serverless Deploy
+    permissions:
+      id-token: write
+      contents: read
+    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/serverless-deploy-workflow.yml
+    with:
+      environment: dev
+    secrets:
+      aws-region: ${{ secrets.AWS_REGION }}
+      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+      aws-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+      serverless-access-key: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+```
+
+</details>
+</details>
+
+It's also possible to use this to provision to an ephemeral (short-lived) environment, based on whether your pr as a `deploy` label. A teardown workflow can support removing the related cloudformation stack, once you have merged your pr.
+
+<details>
+
+<summary>Example of feature deploy related workflows</summary>
+
+- [serverless feature deploy workflow](https://github.com/KremzeeqOrg/fruit-project-api-scraper/blob/main/.github/workflows/serverless-feature-workflow.yml)
+- [serverless teardown workflow](https://github.com/KremzeeqOrg/fruit-project-api-scraper/blob/main/.github/workflows/serverless-feature-teardown.yml)
+
+</details>
+
+## Pytest Unit Test
+
+<details>
+- [workflow](.github/workflows/pytest-unit-test-workflow.yml)
+
+This workflow can be used to run Pytest unit tests in relation to Python code.
+
+### Typical Workflow Use Case
+
+The Pytest reusable workflow can be used with a matrix, so that Pytests can run concurrently for each directory where tests are specified.
+
+<details>
+
+<summary>Example GitHub Action Workflow Input Details using matrix</summary>
 
 ```
 jobs:
@@ -114,10 +179,11 @@ jobs:
 ```
 
 </details>
+</details>
 
 ## Environment Variables
 
-GitHub environments can be set at the repo or organization level, where environment variables can be specified. Please see [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment) for more info.
+GitHub environments can be set at the repo or organization level, where environment variables and secrets can be specified. Please see [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment) for more info.
 
 <details>
 
@@ -137,15 +203,51 @@ In relation to your GitHub environment e.g. for `dev`/ `prod`, manually set the 
 
 - \* only required for Terraform Plan and Approve workflow
 
+Ensure secrets are set for the following in your workflow. Check the example usage on this page.
+
+| Variable     | Explanation                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| aws-region   | Target AWS region e.g. `eu-west-2`                                                                                                                                                                                                                                                                                                                                                            |
+| aws-iam-role | This is the arn for a AWS IAM role with a trust policy, which enables GitHub as a OIDC provider to assume the role with certain permissions. A policy should also be attached to the role, applying the pinciple of 'least privilige'. Please consult this [AWS blog](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/) for further guidance. |
+
 </details>
 
-### Variables for Pytest Workflow
+<details>
+
+<summary>Variables for Serverless Deploy workflow</summary>
+
+In relation to your GitHub environments e.g. for `feature`, `dev` and `prod`, manually set the following variables:
+
+| Variable           | Explanation                                                       |
+| ------------------ | ----------------------------------------------------------------- |
+| APP                | App name. AWS ECR and Docker Hub repos should have the same name. |
+| ENV                | `feature` / `dev` / `prod`                                        |
+| NODE_VERSION       | Node version. e.g. 20                                             |
+| SERVERLESS_VERSION | Serverless framework version e.g. > 3.38.0                        |
+
+Ensure secrets are set for the following in your workflow. Check the example usage on this page.
+
+| Variable              | Explanation                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| aws-region            | Target AWS region e.g. `eu-west-2`                                                                                                                                                                                                                                                                                                                                                            |
+| aws-iam-role          | This is the arn for a AWS IAM role with a trust policy, which enables GitHub as a OIDC provider to assume the role with certain permissions. A policy should also be attached to the role, applying the pinciple of 'least privilige'. Please consult this [AWS blog](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/) for further guidance. |
+| dockerhub-username    | Username for Docker Hub                                                                                                                                                                                                                                                                                                                                                                       |
+| dockerhub-token       | Docker Hub token                                                                                                                                                                                                                                                                                                                                                                              |
+| serverless-access-key | Serverless Framework access key                                                                                                                                                                                                                                                                                                                                                               |
+
+</details>
+
+<details>
+
+<summary>Variables for Pytest Workflow</summary>
 
 | Variable        | Explanation                                                                                                                                                                        |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | PYTHON_VERSION  | e.g. 3.10                                                                                                                                                                          |
 | PYTEST_TEST_DIR | e.g. `src/tests`                                                                                                                                                                   |
 | test_file       | This variable has to be directly specified in the workflow which calls the reusable workflow e.g. ${{ fromJson('["api_mapping_manager", "record_manager", "scraper", "utils"]') }} |
+
+</details>
 
 ## Acknowledegments
 
