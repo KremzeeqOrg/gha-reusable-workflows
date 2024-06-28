@@ -249,7 +249,7 @@ Ensure secrets are set for the following in your workflow. Check the example usa
 
 </details>
 
-## Acknowledegments
+## Acknowledgements
 
 The workflows comprise of different GitHub Actions below. Please see these GitHub Action projects for further information:
 
