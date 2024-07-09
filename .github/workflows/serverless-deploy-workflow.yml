@@ -61,9 +61,9 @@ jobs:
 
         build_and_push_feature_or_dev() {
           docker build --platform linux/amd64 -t ${commit_tag} -t ${aws_ecr_commit_uri} .
-          if [ ${{ vars.ENV }} == 'feature' ]; then
+          if [ ${{ vars.ENV }} == "feature" ]; then
             docker push ${aws_ecr_commit_uri}
-          elif [ ${{ vars.ENV }} == 'dev' ]; then
+          elif [ ${{ vars.ENV }} == "dev" ]; then
             docker tag ${aws_ecr_commit_uri} ${aws_ecr_latest_uri}
             docker tag ${aws_ecr_commit_uri} ${docker_hub_commit_uri}
             docker tag ${aws_ecr_commit_uri} ${docker_hub_latest_uri}
@@ -88,9 +88,9 @@ jobs:
           docker push ${aws_ecr_latest_uri}
         }
 
-        if [ ${{ vars.ENV }} == 'feature' ] || [ ${{ vars.ENV }} == 'dev' ]; then
+        if [ ${{ vars.ENV }} == "feature" ] || [ ${{ vars.ENV }} == "dev" ]; then
           build_and_push_feature_or_dev
-        elif [ ${{ vars.ENV }} == 'prod' ]; then
+        elif [ ${{ vars.ENV }} == "prod" ]; then
           push_prod
         fi
         echo "image_uri=${aws_ecr_commit_uri}" >> "$GITHUB_OUTPUT"
