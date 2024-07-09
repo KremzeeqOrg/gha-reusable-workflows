@@ -102,7 +102,7 @@ jobs:
       run: | 
         npm i -g serverless@${{ vars.SERVERLESS_VERSION }}
         npm install && npm list -g
-        image_uri="image_uri=${{ steps.docker-push.outputs.image_uri }}"
+        image_uri="imageURI=${{ steps.docker-push.outputs.image_uri }}"
         serverless deploy --stage ${{ vars.ENV }} --param=${image_uri}
       env:
         SERVERLESS_ACCESS_KEY: ${{ secrets.serverless-access-key }}
