@@ -5,6 +5,14 @@ This repo consolidates reusable workflows for GitHub Actions. Example uses are a
 [fruit-project-infra](https://github.com/KremzeeqOrg/fruit-project-infra)
 [fruit-project-api-scraper](https://github.com/KremzeeqOrg/fruit-project-api-scraper)
 
+## Contents
+
+- [Terraform Plan](#terraform-plan)
+- [Terraform Plan and Apply](#terraform-plan-and-apply)
+- [Serverless Deploy Workflow](#serverless-deploy-workflow)
+  - [Tagging Strategy Summary for Docker images](#tagging-strategy-summary-for-docker-images)
+- [Pytest Unit Test](#pytest-unit-test)
+
 ## Terraform Plan
 
 <details>
@@ -39,7 +47,7 @@ on:
       environment: dev
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.DEV_AWS_ACCOUNT_ACCESS_ROLE }}
+      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
 ```
 
 </details>
@@ -78,7 +86,7 @@ jobs:
       environment: dev
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.DEV_AWS_ACCOUNT_ACCESS_ROLE }}
+      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
 
   tf-plan-and-apply-in-prod:
     name: Terraform Plan and Apply in Prod
@@ -92,7 +100,7 @@ jobs:
       environment: prod
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.PROD_AWS_ACCOUNT_ACCESS_ROLE }}
+      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
 
 ```
 
@@ -104,9 +112,32 @@ jobs:
 <details>
 
 - [workflow](.github/workflows/serverless-deploy-workflow.yml)
-- Based on the environment (`feature`/`dev`/`prod`), the workflow implements a tagging strategy for Docker images, which are built and pushed to AWS ECR. - If the environment is `dev`, the image is tagged with `latest` and is pushed to Docker Hub.
-- If the environment is `prod`, this latest image is pulled from Docker Hub prior to deployment. All environments result in a serverless deploy to respective environments, specified as the `stage`. This results in a AWS Cloudformation stack being provisioned with resources as specified in the `serverless.yml` file, speciifed in the repo that calls the reusable workflow.
+- Based on the environment (`feature`/`dev`/`prod`), the workflow implements a tagging strategy for Docker images, which are built and pushed to AWS ECR. `stage`. This results in a AWS Cloudformation stack being provisioned with resources as specified in the `serverless.yml` file, speciifed in the repo that calls the reusable workflow.
 - If you use this workflow, you will need to provision AWS ECR and Docker Hub repos with the same name as the `APP` e.g. `fruit-project-api-scraper`.
+
+### Tagging Strategy Summary for Docker images
+
+<details>
+
+#### feature environment
+
+- Build Docker image with the tag `APP:feature-COMMIT_SHA_SHORT`.
+- Push to AWS ECR with the tag `AWS_ECR_REPO/APP:feature-COMMIT_SHA_SHORT`.
+
+#### dev environment
+
+- Build Docker image with the tag `APP:dev-COMMIT_SHA_SHORT`.
+- Tag image as `AWS_ECR_REPO/APP:dev-COMMIT_SHA_SHORT` and `AWS_ECR_REPO/APP:latest`.
+- Tag image as `DOCKERHUB_USERNAME/APP:dev-COMMIT_SHA_SHORT` and `DOCKERHUB_USERNAME/APP:latest`.
+- Push the image to AWS ECR and Docker Hub with all above tags.
+
+#### prod envionment
+
+- Pull the image from Docker Hub with the tag `DOCKERHUB_USERNAME/APP:dev-COMMIT_SHA_SHORT`.
+- Tag image as `AWS_ECR_REPO/APP:prod-COMMIT_SHA_SHORT` and `AWS_ECR_REPO/APP:latest`.
+- Push the image to AWS ECR with both tags.
+
+</details>
 
 ### Typical Workflow Use Cases
 
@@ -134,8 +165,6 @@ The resusable workflow can support a straightforward deployment to an environmen
       serverless-access-key: ${{ secrets.SERVERLESS_ACCESS_KEY }}
 ```
 
-</details>
-
 It's also possible to use this to provision to an ephemeral (short-lived) environment, based on whether your pr as a `deploy` label. A teardown workflow can support removing the related cloudformation stack, once you have merged your pr.
 
 </details>
@@ -147,6 +176,9 @@ It's also possible to use this to provision to an ephemeral (short-lived) enviro
 - [serverless feature deploy workflow](https://github.com/KremzeeqOrg/fruit-project-api-scraper/blob/main/.github/workflows/serverless-feature-workflow.yml)
 - [serverless teardown workflow](https://github.com/KremzeeqOrg/fruit-project-api-scraper/blob/main/.github/workflows/serverless-feature-teardown.yml)
 
+</details>
+
+</details>
 </details>
 
 ## Pytest Unit Test
