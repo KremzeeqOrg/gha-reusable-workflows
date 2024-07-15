@@ -9,7 +9,6 @@ on:
         required: true
       aws-iam-role:
         required: true
-
 jobs:
   terraform:
     name: "Terraform Plan for PR"
