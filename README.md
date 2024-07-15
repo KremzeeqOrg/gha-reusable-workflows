@@ -49,8 +49,6 @@ on:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
 
-```
-
 </details>
 </details>
 
