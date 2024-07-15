@@ -48,8 +48,10 @@ on:
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+```
 
 </details>
+
 </details>
 
 ## Terraform Plan and Apply
@@ -72,7 +74,6 @@ This workflow could be used following a merge of a PR to the main branch of your
 <summary>Example GitHub Action Workflow Input Details</summary>
 
 ```
-
 jobs:
   tf-plan-and-apply-in-dev:
     name: Terraform Plan and Apply in Dev
@@ -85,7 +86,7 @@ jobs:
       environment: dev
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_ROLE }}
+      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
       tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
 
   tf-plan-and-apply-in-prod:
@@ -100,7 +101,7 @@ jobs:
       environment: prod
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_ROLE}}
+      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
       tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
 ```
 
@@ -148,6 +149,7 @@ The resusable workflow can support a straightforward deployment to an environmen
 <summary>Example GitHub Action Workflow Input Details</summary>
 
 ```
+jobs:
   serverless-deploy:
     name: Serverless Deploy
     permissions:
@@ -179,6 +181,7 @@ It's also possible to use this to provision to an ephemeral (short-lived) enviro
 </details>
 
 </details>
+
 </details>
 
 ## Pytest Unit Test
@@ -198,6 +201,7 @@ The Pytest reusable workflow can be used with a matrix, so that Pytests can run 
 <summary>Example GitHub Action Workflow Input Details using matrix</summary>
 
 ```
+
 jobs:
   pytest:
     name: Pytest
@@ -210,9 +214,11 @@ jobs:
     with:
       environment: dev
       test_file: ${{ matrix.test_file }}
+
 ```
 
 </details>
+
 </details>
 
 ## Environment Variables
