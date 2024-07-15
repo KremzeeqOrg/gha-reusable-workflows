@@ -74,34 +74,35 @@ This workflow could be used following a merge of a PR to the main branch of your
 ```
 
 jobs:
-  tf-plan-and-apply-in-dev:
-    name: Terraform Plan and Apply in Dev
-    permissions:
-      id-token: write
-      issues: write
-      contents: read
-    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan-and-apply.yml@main
-    with:
-      environment: dev
-    secrets:
-      aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_ROLE }}
-      tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
+tf-plan-and-apply-in-dev:
+name: Terraform Plan and Apply in Dev
+permissions:
+id-token: write
+issues: write
+contents: read
+uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan-and-apply.yml@main
+with:
+environment: dev
+secrets:
+aws-region: ${{ secrets.AWS_REGION }}
+aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
 
-  tf-plan-and-apply-in-prod:
-    name: Terraform Plan and Apply in Prod
-    needs: tf-plan-and-apply-in-dev
-    permissions:
-      id-token: write
-      issues: write
-      contents: read
-    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan-and-apply.yml@main
-    with:
-      environment: prod
-    secrets:
-      aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_ROLE}}
-      tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
+tf-plan-and-apply-in-prod:
+name: Terraform Plan and Apply in Prod
+needs: tf-plan-and-apply-in-dev
+permissions:
+id-token: write
+issues: write
+contents: read
+uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/terraform-plan-and-apply.yml@main
+with:
+environment: prod
+secrets:
+aws-region: ${{ secrets.AWS_REGION }}
+aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
+
 ```
 
 </details>
@@ -148,21 +149,23 @@ The resusable workflow can support a straightforward deployment to an environmen
 <summary>Example GitHub Action Workflow Input Details</summary>
 
 ```
-  serverless-deploy:
-    name: Serverless Deploy
-    permissions:
-      id-token: write
-      contents: read
-    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/serverless-deploy-workflow.yml
-    with:
-      environment: dev
-    secrets:
-      aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
-      aws-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
-      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
-      serverless-access-key: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
+serverless-deploy:
+name: Serverless Deploy
+permissions:
+id-token: write
+contents: read
+uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/serverless-deploy-workflow.yml
+with:
+environment: dev
+secrets:
+aws-region: ${{ secrets.AWS_REGION }}
+aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+aws-account-id: ${{ secrets.AWS_ACCOUNT_ID }}
+dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+serverless-access-key: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
 ```
 
 It's also possible to use this to provision to an ephemeral (short-lived) environment, based on whether your pr as a `deploy` label. A teardown workflow can support removing the related cloudformation stack, once you have merged your pr.
@@ -198,18 +201,20 @@ The Pytest reusable workflow can be used with a matrix, so that Pytests can run 
 <summary>Example GitHub Action Workflow Input Details using matrix</summary>
 
 ```
+
 jobs:
-  pytest:
-    name: Pytest
-    permissions:
-      contents: read
-    strategy:
-      matrix:
-        test_file: ${{ fromJson('["api_mapping_manager", "record_manager", "scraper", "utils"]') }}
-    uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/pytest-unit-test-workflow.yml@main
-    with:
-      environment: dev
-      test_file: ${{ matrix.test_file }}
+pytest:
+name: Pytest
+permissions:
+contents: read
+strategy:
+matrix:
+test_file: ${{ fromJson('["api_mapping_manager", "record_manager", "scraper", "utils"]') }}
+uses: KremzeeqOrg/gha-reusable-workflows/.github/workflows/pytest-unit-test-workflow.yml@main
+with:
+environment: dev
+test_file: ${{ matrix.test_file }}
+
 ```
 
 </details>
@@ -294,3 +299,4 @@ The workflows comprise of different GitHub Actions below. Please see these GitHu
 - [hashicorp/setup-terraform@v3](https://github.com/hashicorp/setup-terraform)
 - [borchero/terraform-plan-comment@v1](https://github.com/borchero/terraform-plan-comment)
 - [trstringer/manual-approval@v1](https://github.com/trstringer/manual-approval)
+```
