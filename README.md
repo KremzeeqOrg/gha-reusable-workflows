@@ -48,8 +48,10 @@ on:
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+```
 
 </details>
+
 </details>
 
 ## Terraform Plan and Apply
@@ -299,4 +301,7 @@ The workflows comprise of different GitHub Actions below. Please see these GitHu
 - [hashicorp/setup-terraform@v3](https://github.com/hashicorp/setup-terraform)
 - [borchero/terraform-plan-comment@v1](https://github.com/borchero/terraform-plan-comment)
 - [trstringer/manual-approval@v1](https://github.com/trstringer/manual-approval)
+
+```
+
 ```
