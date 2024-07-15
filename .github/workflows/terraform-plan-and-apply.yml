@@ -9,6 +9,8 @@ on:
         required: true
       aws-iam-role:
         required: true
+      tf-plan-approvers:
+        required: true
 
 jobs:
   terraform:
@@ -53,7 +55,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.token }}
-          approvers: ${{ vars.TF_PLAN_APPROVERS }}
+          approvers: ${{ secrets.tf-plan-approvers }}
           minimum-approvals: ${{ vars.MINIMUM_APPROVALS }}
           issue-title: "Deploy Terraform Plan to ${{ vars.env }}"
           issue-body: "Please review the Terraform Plan"

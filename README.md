@@ -48,6 +48,7 @@ on:
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
       aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+
 ```
 
 </details>
@@ -86,7 +87,8 @@ jobs:
       environment: dev
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
+      aws-iam-role: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_ROLE }}
+      tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
 
   tf-plan-and-apply-in-prod:
     name: Terraform Plan and Apply in Prod
@@ -100,8 +102,8 @@ jobs:
       environment: prod
     secrets:
       aws-region: ${{ secrets.AWS_REGION }}
-      aws-iam-role: ${{ secrets.AWS_ACCOUNT_ACCESS_ROLE }}
-
+      aws-iam-role: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_ROLE}}
+      tf-plan-approvers: ${{ secrets.TF_PLAN_APPROVERS }}
 ```
 
 </details>
@@ -230,7 +232,6 @@ In relation to your GitHub environment e.g. for `dev`/ `prod`, manually set the 
 | ENV                    | e.g. `dev` / `prod`                                                                                 |
 | MINIMUM_APPROVALS\*    | Number of GitHub approvals needed for `terraform plan`                                              |
 | TF_BACKEND_CONFIG_FILE | Backend configuration file for Terraform, required for `terraform init`, e.g. `backend-dev.tfvars`  |
-| TF_PLAN_APPROVERS\*    | Specify GitHub user e.g. `user` or users e.g. `user1,user2`, who can approve Terraform Plan         |
 | TF_VARS_FILE           | Configuration file for environment variables for Terraform. e.g. `tf-vars-dev.tfvars`               |
 | TF_VERSION             | Terraform version e.g. run `terraform --version` to check what you're using locally e.g. 1.8.5      |
 | TF_WORKING_DIR         | Directory where all terraform files are kept in relation to the root for your repo e.g. `terraform` |
@@ -239,10 +240,13 @@ In relation to your GitHub environment e.g. for `dev`/ `prod`, manually set the 
 
 Ensure secrets are set for the following in your workflow. Check the example usage on this page.
 
-| Variable     | Explanation                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| aws-region   | Target AWS region e.g. `eu-west-2`                                                                                                                                                                                                                                                                                                                                                            |
-| aws-iam-role | This is the arn for a AWS IAM role with a trust policy, which enables GitHub as a OIDC provider to assume the role with certain permissions. A policy should also be attached to the role, applying the pinciple of 'least privilige'. Please consult this [AWS blog](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/) for further guidance. |
+| Variable            | Explanation                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| aws-region          | Target AWS region e.g. `eu-west-2`                                                                                                                                                                                                                                                                                                                                                            |
+| aws-iam-role        | This is the arn for a AWS IAM role with a trust policy, which enables GitHub as a OIDC provider to assume the role with certain permissions. A policy should also be attached to the role, applying the pinciple of 'least privilige'. Please consult this [AWS blog](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/) for further guidance. |
+| tf-plan-approvers\* | Specify GitHub user e.g. `user` or users e.g. `user1,user2`, who can approve Terraform Plan                                                                                                                                                                                                                                                                                                   |
+
+- \* only required for Terraform Plan and Approve workflow
 
 </details>
 
